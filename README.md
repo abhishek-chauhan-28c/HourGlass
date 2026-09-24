@@ -14,7 +14,7 @@ Streamlit application for processing mention spreadsheets and exporting filtered
 3. Start the app:
 
    ```bash
-   streamlit run streamlit_app.py
+   python -m streamlit run streamlit_app.py
    ```
 
 Upload an `.xlsx` workbook with a `Mentions` sheet, enter the source file name, and select **Process File**.
