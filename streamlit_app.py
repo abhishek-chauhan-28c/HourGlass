@@ -36,9 +36,9 @@ BANK_KEYWORDS = ['hdfc', 'icici', 'kotak']
 # Nickname to exclude, per bank — only excluded when the file actually belongs
 # to that bank (e.g. HDFCBank_Cares is only marked N in HDFC files).
 NICKNAME_EXCLUDE = {
-    'hdfc': 'hdfcbank_cares',
-    'icici': 'icicibank_care',
-    'kotak': 'kotakcares',
+    'hdfc': ['hdfcbank_cares', 'hdfcergogic','hdfcsec','hdfclife','hdfcmf','hdfcpension','hdfcbanknews','hdfcbankcsr','hdfc_bank','hdfcsky','hdfcskygujarati','hdfc life','hdfc bank','hdfc securities','hdfc pension','hdfc mutual fund','hdfc ergo general insurance company limited','hdfc sky','hdfc bank of sri lanka'],
+    'icici': ['icicibank_care','icicilifeins','icicilombard','icicibank','icici_direct','icicidirectcare','iciciprumf','icicidirect','icici lombard','icici bank','icici prudential mutual fund','icici home finance','icici life insruance'],
+    'kotak': ['kotakcares','kotakneosupport','kotakbankltd','kotak_pvt','kotak mahindra bank','kotak mahindra bank ltd.','kotak life','kotak neo'],
 }
 
 # Competitor brand names that look like HDFC Bank but aren't — only checked
@@ -70,10 +70,11 @@ def find_column(columns, target_name):
     return None
 
 
-def compute_relevant(row, bank_keyword, resource_col, nickname_col, source_col):
+def compute_relevant(row, bank_keyword, resource_col, nickname_col, source_col, publication_place_col):
     resource_type = str(row.get(resource_col, '')).strip().lower() if resource_col else ''
     nickname = str(row.get(nickname_col, '')).strip().lower() if nickname_col else ''
     source = str(row.get(source_col, '')).strip().lower() if source_col else ''
+    publication_place = str(row.get(publication_place_col, '')).strip().lower() if publication_place_col else ''
     combine_lower = str(row.get('Combine text', '')).lower()
     stock_val = str(row.get('Stock', '')).strip()
 
@@ -94,7 +95,9 @@ def compute_relevant(row, bank_keyword, resource_col, nickname_col, source_col):
 
     # Rule 4: bank's own official "care" handle is noise, not a real mention —
     # only applies to the matching bank's file.
-    if bank_keyword in NICKNAME_EXCLUDE and nickname == NICKNAME_EXCLUDE[bank_keyword]:
+    
+    # Making changes in the logic to mark 'N' for all bank handles.
+    if bank_keyword in NICKNAME_EXCLUDE and str(nickname).lower() in NICKNAME_EXCLUDE[bank_keyword] and str(publication_place).lower() in NICKNAME_EXCLUDE[bank_keyword]:
         return 'N'
 
     # Rule 5: competitor brands that look like HDFC or ICICI but aren't (HDFC Life,
@@ -168,15 +171,17 @@ if run_button:
         resource_col = find_column(df.columns, 'Resource type')
         nickname_col = find_column(df.columns, 'Nickname')
         source_col = find_column(df.columns, 'Source')
+        publication_place_col = find_column(df.columns, 'Publication place')
         relevant_missing_cols = [
             name for name, col in [
                 ('Resource type', resource_col),
                 ('Nickname', nickname_col),
                 ('Source', source_col),
+                ('Publication place', publication_place_col),
             ] if col is None
         ]
         df['Relevant'] = df.apply(
-            lambda row: compute_relevant(row, bank_keyword, resource_col, nickname_col, source_col),
+            lambda row: compute_relevant(row, bank_keyword, resource_col, nickname_col, source_col, publication_place_col),
             axis=1
         )
 
