@@ -97,7 +97,7 @@ def compute_relevant(row, bank_keyword, resource_col, nickname_col, source_col, 
     # only applies to the matching bank's file.
     
     # Making changes in the logic to mark 'N' for all bank handles.
-    if bank_keyword in NICKNAME_EXCLUDE and str(nickname).strip().lower() in NICKNAME_EXCLUDE[bank_keyword] and str(publication_place).strip().lower() in NICKNAME_EXCLUDE[bank_keyword]:
+    if bank_keyword in NICKNAME_EXCLUDE and (str(nickname).strip().lower() in NICKNAME_EXCLUDE[bank_keyword] or str(publication_place).strip().lower() in NICKNAME_EXCLUDE[bank_keyword]):
         return 'N'
 
     # Rule 5: competitor brands that look like HDFC or ICICI but aren't (HDFC Life,
